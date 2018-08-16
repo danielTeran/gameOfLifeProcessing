@@ -61,7 +61,7 @@ void randomCells(){
 * y fija los atributos de la ventana
 */
 void setup() {
-  size (900, 600); //Tamaño de la reticula
+  size (900, 800); //Tamaño de la reticula
   //Se inicializa los estados del automata y los buffers
   celulas = new int[width/celulaSize][height/celulaSize];
   celBuffer = new int[width/celulaSize][height/celulaSize];
@@ -251,4 +251,10 @@ void keyPressed() {
   if (key=='2') regla = 2;
   if (key=='3') regla = 3;
   if (key=='4') regla = 4;
+  if (key == CODED) {
+    if (keyCode == UP) {if(intervalo >= 0) intervalo-=5;}
+    else if (keyCode == DOWN) {if(intervalo <= 300) intervalo+=5;}
+    else if (keyCode == LEFT) {if(probDeVida >= 0) probDeVida-=10;}
+    else if (keyCode == RIGHT) {if(probDeVida <= 100) probDeVida+=10;}
+  }
 }
