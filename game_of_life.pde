@@ -1,7 +1,8 @@
 
-/**
-* Settings del programa
-*/
+/**************************
+** Settings del programa **
+**************************/
+
 //Tamaño de las celdas en pixeles
 int celulaSize = 8;
 
@@ -14,6 +15,7 @@ boolean pausa = false;
 
 //Tipo de reglas
 int regla = 0;
+
 /*****************************/
 
 
@@ -34,13 +36,13 @@ color estatica = color(0, 0, 250); //color azul para las estructuras estaticas
 color oscilador = color(200, 0, 0); //color rojo para las estructuras periodicas
 
 //Probabilidad de inicializacion de la celula de iniciar viva al inicio del programa
-float probDeVida = 22;//muy pesimista
+float probDeVida = 30;
 /*****************************/
 
 
-/**
-* Funciones
-*/
+/**************
+** Funciones **
+***************/
 
 void randomCells(){
   //Se inicializan el estado de las celulas
@@ -137,6 +139,8 @@ void updateWithRules(){
 
 /**
 * Define las reglas con las que se comportara nuestro automata
+* Se siguio el elemento de la lista 
+* https://es.wikipedia.org/wiki/Juego_de_la_vida#Variantes
 */
 void rules(int x, int y, int neighbours) {
   switch(regla){
@@ -146,6 +150,38 @@ void rules(int x, int y, int neighbours) {
       } 
       else { //creamos una celula    
         if (neighbours==3) celulas[x][y] = 1;
+      }
+    break;
+    case 1: //Regla 16/6
+      if (celBuffer[x][y]==1) { //matamos a la celula
+        if (neighbours>1 && neighbours<6) celulas[x][y] = 0; 
+      } 
+      else { //creamos una celula    
+        if (neighbours==6) celulas[x][y] = 1;
+      }
+    break;
+    case 2: //Regla High Life
+      if (celBuffer[x][y]==1) { //matamos a la celula
+        if (neighbours<2 || neighbours>3) celulas[x][y] = 0; 
+      } 
+      else { //creamos una celula    
+        if (neighbours==3 || neighbours==6) celulas[x][y] = 1;
+      }
+    break;
+    case 3: //Regla Diffusion
+      if (celBuffer[x][y]==1) { //matamos a la celula
+        if (neighbours!=2) celulas[x][y] = 0; 
+      } 
+      else { //creamos una celula    
+        if (neighbours==7) celulas[x][y] = 1;
+      }
+    break;
+    case 4: //Regla Reino de amebas
+      if (celBuffer[x][y]==1) { //matamos a la celula
+        if (neighbours!=1 && neighbours!=3 && neighbours!=5 && neighbours!=8) celulas[x][y] = 0; 
+      } 
+      else { //creamos una celula    
+        if (neighbours==3||neighbours==5||neighbours==7) celulas[x][y] = 1;
       }
     break;
   }
@@ -167,9 +203,9 @@ void checkStructures() {
 /*****************************/
 
 
-/**
-* Acciones
-*/
+/*************
+** Acciones **
+*************/
 
 /**
 * Crea nuevas celulas con el cursor si esta en pausa el automata
@@ -206,14 +242,13 @@ void keyPressed() {
   if (key=='b' || key == 'B') {
     for (int x=0; x<width/celulaSize; x++) {
       for (int y=0; y<height/celulaSize; y++) {
-        celulas[x][y]=0; celBuffer[x][y]=0;celBuffer2[x][y]=0;celBuffer3[x][y]=0;
+        celulas[x][y]=0;celBuffer[x][y]=0;celBuffer2[x][y]=0;celBuffer3[x][y]=0;
       }
     }
   }
-  if (key == 'p' || key == 'P') {
-    celulaSize ++; //corregir la cota superior
-  }
-  if (key == 'm' || key == 'M') {
-    celulaSize --; //corregir la cota inferior, checar antes de ejecutar
-  }
+  if (key=='0') regla = 0;
+  if (key=='1') regla = 1;
+  if (key=='2') regla = 2;
+  if (key=='3') regla = 3;
+  if (key=='4') regla = 4;
 }
