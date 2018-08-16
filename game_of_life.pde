@@ -5,7 +5,7 @@
 //Tamaño de las celdas en pixeles
 int celulaSize = 8;
 
-//Intervalo de actualización
+//Intervalo de actualizacion
 int intervalo = 100;
 int auxTiempo = 0;
 
@@ -24,6 +24,8 @@ int regla = 0;
 int[][] celulas; 
 int[][] celBuffer;
 int[][] celBuffer2;
+int[][] celBuffer3;
+int[][] checking;
 
 //Colores de las celulas
 color viva = color(0, 200, 0);
@@ -31,7 +33,7 @@ color muerta = color(0);
 color estatica = color(0, 0, 250); //color azul para las estructuras estaticas
 color oscilador = color(200, 0, 0); //color rojo para las estructuras periodicas
 
-//Probabilidad de inicialización de la celula de iniciar viva al inicio del programa
+//Probabilidad de inicializacion de la celula de iniciar viva al inicio del programa
 float probDeVida = 22;//muy pesimista
 /*****************************/
 
@@ -62,6 +64,8 @@ void setup() {
   celulas = new int[width/celulaSize][height/celulaSize];
   celBuffer = new int[width/celulaSize][height/celulaSize];
   celBuffer2 = new int[width/celulaSize][height/celulaSize];
+  celBuffer3 = new int[width/celulaSize][height/celulaSize];
+  checking = new int[width/celulaSize][height/celulaSize];
   //Inicializamos el valor al azar del automata
   randomCells();
   
@@ -76,7 +80,9 @@ void setup() {
 void draw() {
   for (int x=0; x<width/celulaSize; x++) {
     for (int y=0; y<height/celulaSize; y++) {
-      if (celulas[x][y]==1) fill(viva); //Se colorea verde si está viva
+      if (celulas[x][y]==1 && checking[x][y]==0) fill(viva); //Se colorea verde si esta viva
+      else if(celulas[x][y]==1 && checking[x][y]==1) fill(estatica); //Se colorea azul si es estatica
+      else if(celulas[x][y]==1 && checking[x][y]==2) fill(oscilador); //Se colorea rojo si es oscila
       else fill(muerta); // Se colorea negro si esta muerta la celula
       rect (x*celulaSize, y*celulaSize, celulaSize, celulaSize);
     }
@@ -98,7 +104,8 @@ void iteration() {
   for (int x=0; x<width/celulaSize; x++) {
     for (int y=0; y<height/celulaSize; y++) {
       //guardamos dos estados anteriores para detectar
-      //estructuras estaticas u osciladores 
+      //estructuras estaticas u osciladores
+      celBuffer3[x][y] = celBuffer2[x][y];
       celBuffer2[x][y] = celBuffer[x][y]; 
       celBuffer[x][y] = celulas[x][y];
     }
@@ -125,6 +132,7 @@ void updateWithRules(){
       rules(x,y,neighbours);
     }
   }
+  checkStructures();
 }
 
 /**
@@ -132,7 +140,7 @@ void updateWithRules(){
 */
 void rules(int x, int y, int neighbours) {
   switch(regla){
-    case 0:
+    case 0: //Regla 23/3 la estandar del juego de la vida
       if (celBuffer[x][y]==1) { //matamos a la celula
         if (neighbours<2 || neighbours>3) celulas[x][y] = 0; 
       } 
@@ -140,6 +148,19 @@ void rules(int x, int y, int neighbours) {
         if (neighbours==3) celulas[x][y] = 1;
       }
     break;
+  }
+}
+
+void checkStructures() {
+  for (int x=0; x<width/celulaSize; x++) {
+    for (int y=0; y<height/celulaSize; y++) {
+      //Si se mantiene constante durante tres iteraciones esa celda
+      if (celBuffer[x][y]==celulas[x][y] && celBuffer2[x][y]==celulas[x][y]) checking[x][y] = 1;
+      //si hay una osilacion de periodo 2
+      else if (celBuffer2[x][y]==celulas[x][y] && celBuffer3[x][y]==celBuffer[x][y]) checking[x][y] = 2;
+      //regresa al caso base para distinguir la coloracion
+      else checking[x][y] = 0;
+    }
   }
 }
 
@@ -176,7 +197,7 @@ void updateMouseCells() {
 * @override
 * Ejecuta las acciones de presionar los siguientes botones:
 * - R o r: reinicia aleatoreamente el valor del automata
-* - ' '(space tab): pausa la ejecución del automata
+* - ' '(space tab): pausa la ejecucion del automata
 * - B o b: borra los valores de la reticula
 */
 void keyPressed() {
@@ -185,7 +206,7 @@ void keyPressed() {
   if (key=='b' || key == 'B') {
     for (int x=0; x<width/celulaSize; x++) {
       for (int y=0; y<height/celulaSize; y++) {
-        celulas[x][y] = 0;
+        celulas[x][y]=0; celBuffer[x][y]=0;celBuffer2[x][y]=0;celBuffer3[x][y]=0;
       }
     }
   }
